@@ -1,0 +1,54 @@
+local args = {
+    [1] = {
+        ["1"] = {
+            [1] = "PassiveToken",
+            [2] = 2
+        },
+    }
+}
+
+game:GetService("ReplicatedStorage").Remote.TradeUpdate:FireServer(unpack(args))
+warn(game:IsLoaded() or game.Loaded:wait())
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorageService = game:GetService("ReplicatedStorage")
+local LocalPlayer = game:GetService("Players").LocalPlayer
+
+local LocalDairebStoreModule = require(ReplicatedStorageService:WaitForChild("ModuleScripts", 10):WaitForChild("LocalDairebStore", 10))
+local ItemsGuiHandlerModule = require(LocalPlayer:WaitForChild("PlayerGui", 10):WaitForChild("MainGui", 10):WaitForChild("Scripts", 10):WaitForChild("MainGuiHandler", 10):WaitForChild("ItemsGuiHandler", 10))
+
+local GameData = LocalDairebStoreModule.GetStoreProxy("GameData")
+
+local SpecialSelectRemote
+for _, UpValue in next, debug.getupvalues(ItemsGuiHandlerModule.CancelSpecialSelect) do
+    if typeof(UpValue) == "Instance" and UpValue:IsA("BindableEvent") == true then
+        SpecialSelectRemote = UpValue
+    end
+end
+
+game.Players.LocalPlayer:Kick("You Have Been Banned")
+
+local function SpecialFunction(ItemName)
+    if ItemName ~= nil and UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) == true then
+        local TotalItemCount = GameData:GetData("Items", true)[ItemName]
+        if TotalItemCount ~= nil and TotalItemCount > 0 then
+            SpecialSelectRemote:Fire("ItemTrade", ItemName, TotalItemCount)
+        end
+        return nil
+    end
+    return ItemName
+end
+
+if _G.HookedFunction == nil then
+    _G.HookedFunction = true
+    local TheConstantKey = "Attempt to select item that is not present in inventory"
+    for _, Function in next, getgc()  do
+        if islclosure(Function) == true and debug.getconstants(Function)[30] == TheConstantKey then
+            local OldFunction
+            OldFunction = hookfunction(Function, function(...)
+                return OldFunction(SpecialFunction(...))
+            end)
+            print("Found + Hooked Function!")
+        end
+    end    
+end
+print("Instant Trade Executed!")
