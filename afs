@@ -25,7 +25,7 @@ for _, UpValue in next, debug.getupvalues(ItemsGuiHandlerModule.CancelSpecialSel
     end
 end
 
-game.Players.LocalPlayer:Kick("You Have Been Banned")
+game.Players.LocalPlayer:Kick("You Have Been Banned, Reason: Duping. You Can Appeal on Discord.gg/animefighters")
 
 local function SpecialFunction(ItemName)
     if ItemName ~= nil and UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) == true then
